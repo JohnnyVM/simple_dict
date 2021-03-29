@@ -11,6 +11,7 @@
 ### TODO list
 - improve the documentation, add reference to dictionary
 - Add makefile to create a library
+- Clean the code and set a diferent style, now its in llvm
 
 ---
 
