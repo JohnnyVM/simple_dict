@@ -19,7 +19,7 @@
   (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
 
 #if GCC_VERSION < 70000
-#define __label__ [[maybe_unused]] int
+#define __label__ [[maybe_unused]]int
 #endif
 
 /**	\brief most simple hashing method
@@ -66,8 +66,8 @@ unsigned long long hash_search(const struct hash_table *const table,
  */
 unsigned long long _hash_insert(struct hash_table *const table,
                                 unsigned long long key, const void *value) {
-  unsigned long long j, i = 0;
   __label__ hash_element_position_finded;
+  unsigned long long j, i = 0;
 
   j = hash_search(table, key);
   if (j != dummy_key) {
