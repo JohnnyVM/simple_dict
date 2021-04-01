@@ -4,10 +4,13 @@
 #include <stdlib.h>
 #include <limits.h>
 
-#define dummy_key ULLONG_MAX
+#define DUMMY_KEY ULLONG_MAX
+
+// todo explain this magic number
+#define OCCUPACY 2 / 3.0
 
 struct hash_element {
-	unsigned long long hash;
+	unsigned long long hash; // its use as sentinel value fot check if was used
 	unsigned long long key;
 	void* value;
 };
