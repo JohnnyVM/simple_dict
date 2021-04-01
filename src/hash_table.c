@@ -44,7 +44,7 @@ unsigned long long hash_search(const struct hash_table *const table, const unsig
 	unsigned long long j, i = 0;
 	do {
 		j = hash_method(table, key, i);
-		if (table->slot[j].key == key) {
+		if (table->slot[j].hash != DUMMY_KEY && table->slot[j].key == key) {
 			return j;
 		}
 		++i;
@@ -77,11 +77,11 @@ unsigned long long _hash_insert(struct hash_table *const table, unsigned long lo
 	do {
 		j = hash_method(table, key, i);
 		if (table->slot[j].hash == DUMMY_KEY || table->slot[j].key == DUMMY_KEY) {
+			++table->used;
 hash_element_position_found:
 			table->slot[j].hash = hash_method(table, key, 0);
 			table->slot[j].key = key;
 			table->slot[j].value = (void *)value;
-			++table->used;
 			return j;
 		}
 		++i;
@@ -101,20 +101,20 @@ hash_element_position_found:
 unsigned long long hash_insert(struct hash_table *table, unsigned long long key, const void *value) {
 	struct hash_table aux;
 	struct hash_element *el;
-	unsigned long long j;
+	unsigned long long j,i;
 
 	if (!table->capacity || table->used / (long double)table->capacity > OCCUPACY) {
 		aux.capacity = 2 * (table->capacity ? table->capacity : 1);
 		aux.used = 0;
-		aux.slot = calloc(aux.capacity, sizeof(struct hash_element));
+		aux.slot = malloc(aux.capacity * sizeof(struct hash_element));
+		assert(aux.slot);
 
 		//mark the table as unused
-		for (unsigned long long i = 0; i < aux.capacity; el = aux.slot + i, ++i) { aux.slot[i].hash = DUMMY_KEY; }
+		for (i = 0; i < aux.capacity; ++i) { aux.slot[i].hash = DUMMY_KEY; }
 
-		for (unsigned long long i = 0; i < table->capacity; el = table->slot + i, ++i) {
+		for (el = table->slot, i = 0; i < table->capacity; ++i, el = table->slot + i) {
 			if (el->hash != DUMMY_KEY && el->key != DUMMY_KEY) {
-				j = _hash_insert(&aux, el->key, el->value);
-				assert(j != DUMMY_KEY);
+				_hash_insert(&aux, el->key, el->value);
 			}
 		}
 		if(table->slot) { free(table->slot); }

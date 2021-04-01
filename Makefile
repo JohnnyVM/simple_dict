@@ -1,6 +1,6 @@
 debug ?= false
 ifeq (${debug}, true)
-	DEBUG_FLAGS := -g3 -ggdb -ftrapv -fsanitize=address -fsanitize=leak -fsanitize=undefined
+	DEBUG_FLAGS := -pg -g3 -ggdb -ftrapv -fsanitize=address -fsanitize=leak -fsanitize=undefined
 endif
 
 SOURCES := $(wildcard src/*.c)
