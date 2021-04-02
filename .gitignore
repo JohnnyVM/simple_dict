@@ -60,3 +60,6 @@ tests/tests
 
 # Profile
 gmon.out
+
+# Compile commands
+**/compile_commands.json

@@ -42,7 +42,7 @@ TEST(hash_table, create_insert_update_delete)
 	key = hash_delete(&table, 0LLU);
 	CHECK(table.used == 0);
 	CHECK(key2 == key);
-	CHECK((long unsigned)table.slot[key].value == 2);
+	CHECK(hash_get(&table, key, NULL) == NULL);
 	CHECK(table.used == 0);
 	free(table.slot);
 	table.capacity = 0;
@@ -59,10 +59,10 @@ TEST(hash_table, create_insert_collision_search)
 	CHECK(key2 != DUMMY_KEY);
 	key3 = hash_search(&table, 0LLU);
 	CHECK(key3 == key);
-	CHECK((long unsigned)table.slot[key3].value == 1);
+	CHECK((long unsigned)hash_get(&table, key3, NULL) == 1);
 	key3 = hash_search(&table, table.capacity);
 	CHECK(key3 == key2);
-	CHECK((long unsigned)table.slot[key3].value == 2);
+	CHECK((long unsigned)hash_get(&table, table.capacity, NULL) == 2);
 	free(table.slot);
 	table.capacity = 0;
 }
@@ -70,7 +70,7 @@ TEST(hash_table, create_insert_collision_search)
 TEST(hash_table, stress)
 {
 	long long unsigned key;
-	int tryes = 10000;
+	int tryes = 100;
 
 	for(long i = 0; i < tryes; ++i ) {
 		key = hash_insert(&table, i, (void*)(long long)i);

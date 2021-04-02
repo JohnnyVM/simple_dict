@@ -24,9 +24,10 @@ struct hash_table {
 
 unsigned long long char2ull( const char* const , const size_t );
 
-unsigned long long _hash_insert(struct hash_table* const table, unsigned long long key, const void *value);
 unsigned long long hash_insert(struct hash_table* table, unsigned long long key, const void *value);
 unsigned long long hash_search(const struct hash_table* const table, const unsigned long long key);
 unsigned long long hash_delete(struct hash_table* const table, const unsigned long long key);
+inline unsigned long long hash_len(const struct hash_table* const);
+void* hash_get(const struct hash_table* const, unsigned long long key, void* const defaul);
 
 #endif // HASH_TABLE_H

@@ -61,7 +61,7 @@ unsigned long long hash_search(const struct hash_table *const table, const unsig
  *	\param i number of probes
  *	\return index of hash
  */
-unsigned long long _hash_insert(struct hash_table *const table, unsigned long long key, const void *value) {
+static unsigned long long _hash_insert(struct hash_table *const table, unsigned long long key, const void *value) {
 
 	#if GCC_VERSION > 70000
 	__label__ hash_element_position_found;
@@ -109,7 +109,7 @@ unsigned long long hash_insert(struct hash_table *table, unsigned long long key,
 		aux.slot = malloc(aux.capacity * sizeof(struct hash_element));
 		assert(aux.slot);
 
-		//mark the table as unused
+		//mark the new table as unused
 		for (i = 0; i < aux.capacity; ++i) { aux.slot[i].hash = DUMMY_KEY; }
 
 		for (el = table->slot, i = 0; i < table->capacity; ++i, el = table->slot + i) {
@@ -122,7 +122,6 @@ unsigned long long hash_insert(struct hash_table *table, unsigned long long key,
 	}
 
 	j = _hash_insert(table, key, value);
-	assert(j != DUMMY_KEY);
 
 	return j;
 }
@@ -143,4 +142,30 @@ unsigned long long hash_delete(struct hash_table *const table, const unsigned lo
 	}
 
 	return j;
+}
+
+/** \brief Return the number of items in the hash table
+ *	\param t hash table
+ * \return return the number of items
+ */
+inline unsigned long long hash_len(const struct hash_table *const t)
+{
+	return t->used;
+}
+
+/**	\brief Return the value for key if key is in the hash, else default.
+ *	\param table hash_table
+ *	\param key key table
+ *	\param default default value if key not found
+ *	\return if key exist return key, else default
+ */
+void* hash_get(const struct hash_table* const table , unsigned long long key, void* const defaul)
+{
+	unsigned long long j = hash_search(table, key);
+
+	if (j != DUMMY_KEY) {
+		return table->slot[j].value;
+	}
+
+	return defaul;
 }
