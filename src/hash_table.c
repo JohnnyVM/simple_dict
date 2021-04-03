@@ -8,6 +8,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 
 #include "hash_table.h"
 
@@ -25,10 +26,10 @@
  *	\param i number of probes
  *	\return index of hash
  */
-static inline unsigned long long
+static inline uintmax_t
 hash_method_linear_division(const struct hash_table *const table,
-				                    const unsigned long long key,
-				                    const unsigned long long i) {
+				                    const uintmax_t key,
+				                    const uintmax_t i) {
 	return (key + i) % table->capacity;
 }
 
@@ -39,9 +40,9 @@ hash_method_linear_division(const struct hash_table *const table,
  *	\param i number of probes
  *	\return index of hash
  */
-unsigned long long hash_search(const struct hash_table *const table, const unsigned long long key) {
+uintmax_t hash_search(const struct hash_table *const table, const uintmax_t key) {
 
-	unsigned long long j, i = 0;
+	uintmax_t j, i = 0;
 
 	if(table == NULL) { return DUMMY_KEY; }
 
@@ -60,7 +61,7 @@ unsigned long long hash_search(const struct hash_table *const table, const unsig
  *	\param table table to seaarch
  *	\param key key to search
  */
-int hash_has_key(const struct hash_table *const table, const unsigned long long key) {
+int hash_has_key(const struct hash_table *const table, const uintmax_t key) {
 	if(hash_search(table, key) != DUMMY_KEY) {
 		return 1;
 	}
@@ -76,9 +77,9 @@ int hash_has_key(const struct hash_table *const table, const unsigned long long 
  *	\param i number of probes
  *	\return index of hash
  */
-static unsigned long long _hash_insert(struct hash_table *const table, unsigned long long key, const void* const value) {
+static uintmax_t _hash_insert(struct hash_table *const table, uintmax_t key, const void* const value) {
 
-	unsigned long long j, i = 0;
+	uintmax_t j, i = 0;
 
 	if(table == NULL) { return DUMMY_KEY; }
 
@@ -113,10 +114,10 @@ static unsigned long long _hash_insert(struct hash_table *const table, unsigned 
  *	\param i number of probes
  *	\return index of hash
  */
-unsigned long long hash_insert(struct hash_table *table, unsigned long long key, const void* const value) {
+uintmax_t hash_insert(struct hash_table *table, uintmax_t key, const void* const value) {
 	struct hash_table aux;
 	struct hash_element *el;
-	unsigned long long j,i;
+	uintmax_t j,i;
 
 	if(table == NULL) { return DUMMY_KEY; }
 
@@ -149,9 +150,9 @@ unsigned long long hash_insert(struct hash_table *table, unsigned long long key,
  *	\param key key value to delete
  *	\return index of hash
  */
-unsigned long long hash_delete(struct hash_table *const table, const unsigned long long key)
+uintmax_t hash_delete(struct hash_table *const table, const uintmax_t key)
 {
-	unsigned long long j;
+	uintmax_t j;
 
 	if(table == NULL) { return DUMMY_KEY; }
 
@@ -168,7 +169,7 @@ unsigned long long hash_delete(struct hash_table *const table, const unsigned lo
  *	\param t hash table
  * \return return the number of items
  */
-inline unsigned long long hash_len(const struct hash_table *const t)
+inline uintmax_t hash_len(const struct hash_table *const t)
 {
 	if(t == NULL) { return DUMMY_KEY; }
 
@@ -185,9 +186,9 @@ inline unsigned long long hash_len(const struct hash_table *const t)
  *	\param default default value if key not found
  *	\return if key exist return key, else default
  */
-void* hash_get(const struct hash_table* const table , unsigned long long key, const void* const defaul)
+void* hash_get(const struct hash_table* const table , uintmax_t key, const void* const defaul)
 {
-	unsigned long long j;
+	uintmax_t j;
 
 	if(table == NULL) { return (void*)defaul; }
 
@@ -199,21 +200,21 @@ void* hash_get(const struct hash_table* const table , unsigned long long key, co
 	return (void*)defaul;
 }
 
-/**	\brief get a char and transform in unsigned long long
+/**	\brief get a char and transform in uintmax_t
  *
- *	if the string its longer than sizeof(unsigned long long) its truncated
+ *	if the string its longer than sizeof(uintmax_t) its truncated
  *	assumption, the end of the string its more probably to be different
  *	\param cad string to transform
  */
-unsigned long long char2ull(const char* const cad)
+uintmax_t char2ull(const char* const cad)
 {
-	unsigned long long c, key = 0;
+	uintmax_t c, key = 0;
 	size_t len;
 
 	len = strlen(cad);
 
-	for(unsigned long long i = 0; len - i > 0 && i < sizeof(unsigned long long); ++i) {
-		c = (unsigned long long)cad[len - i - 1];
+	for(uintmax_t i = 0; len - i > 0 && i < sizeof(uintmax_t); ++i) {
+		c = (uintmax_t)cad[len - i - 1];
 		c <<= 8 * i;
 		key |= c;
 	}
@@ -222,13 +223,13 @@ unsigned long long char2ull(const char* const cad)
 }
 
 /**	\helper method of insert for string */
-unsigned long long dict_insert(struct hash_table* const dict, const char* const key, const void* const value)
+uintmax_t dict_insert(struct hash_table* const dict, const char* const key, const void* const value)
 {
 	return hash_insert(dict, char2ull(key), value);
 }
 
 /**	\helper method of search for string */
-unsigned long long dict_search(struct hash_table* const dict, const char* const key)
+uintmax_t dict_search(struct hash_table* const dict, const char* const key)
 {
 	return hash_search(dict, char2ull(key));
 }
@@ -240,7 +241,7 @@ int dict_has_key(const struct hash_table* const dict, const char* const key)
 }
 
 /**	\helper method of delete for string */
-unsigned long long dict_delete(struct hash_table* const dict, const char* const key)
+uintmax_t dict_delete(struct hash_table* const dict, const char* const key)
 {
 	return hash_delete(dict, char2ull(key));
 }

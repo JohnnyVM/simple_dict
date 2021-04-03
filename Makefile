@@ -3,6 +3,11 @@ ifeq (${debug}, true)
 	DEBUG_FLAGS := -pg -g3 -ggdb -ftrapv -fsanitize=address -fsanitize=leak -fsanitize=undefined
 endif
 
+profile ?= false
+ifeq (${profile}, true)
+	DEBUG_FLAGS += -pg
+endif
+
 SOURCES := $(wildcard src/*.c)
 OBJECTS := $(patsubst %.c,%.o,${SOURCES})
 DEPENDENCIES := $(patsubst %.c,%.d,${SOURCES})
