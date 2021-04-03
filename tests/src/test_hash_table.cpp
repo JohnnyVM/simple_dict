@@ -70,26 +70,33 @@ TEST(hash_table, create_insert_collision_search)
 TEST(hash_table, stress)
 {
 	long long unsigned key;
-	int tryes = 100;
+	unsigned int tryes = 100;
 
-	for(long i = 0; i < tryes; ++i ) {
+	for(unsigned long i = 0; i < tryes; ++i ) {
 		key = hash_insert(&table, i, (void*)(long long)i);
 		CHECK(key != DUMMY_KEY);
 	}
 	CHECK(table.used == (unsigned)tryes);
-	for(long i = 0; i < tryes; ++i ) {
+	for(unsigned long i = 0; i < tryes; ++i ) {
 		key = hash_search(&table, i);
 		CHECK(key != DUMMY_KEY);
 	}
-	for(long i = 0; i < tryes; ++i ) {
+	for(unsigned long i = 0; i < tryes; ++i ) {
 		key = hash_delete(&table, i);
 		CHECK(key != DUMMY_KEY);
 	}
 	CHECK(table.used == 0);
-	for(long i = 0; i < tryes; ++i ) {
+	for(unsigned long i = 0; i < tryes; ++i ) {
 		key = hash_search(&table, i);
 		CHECK(key == DUMMY_KEY);
 	}
 	free(table.slot);
 	table.capacity = 0;
+}
+
+TEST(hash_table, char2ull)
+{
+	char a[] = "a";
+
+	CHECK(int('a') == char2ull(a));
 }

@@ -42,6 +42,9 @@ hash_method_linear_division(const struct hash_table *const table,
 unsigned long long hash_search(const struct hash_table *const table, const unsigned long long key) {
 
 	unsigned long long j, i = 0;
+
+	if(table == NULL) { return DUMMY_KEY; }
+
 	do {
 		j = hash_method(table, key, i);
 		if (table->slot[j].hash != DUMMY_KEY && table->slot[j].key == key) {
@@ -53,6 +56,18 @@ unsigned long long hash_search(const struct hash_table *const table, const unsig
 	return DUMMY_KEY;
 }
 
+/**	\brief helper common method search key
+ *	\param table table to seaarch
+ *	\param key key to search
+ */
+int hash_has_key(const struct hash_table *const table, const unsigned long long key) {
+	if(hash_search(table, key) != DUMMY_KEY) {
+		return 1;
+	}
+
+	return 0;
+}
+
 /**	\brief hash table insert, override value if key already exists
  *
  *	\todo remove that goto...
@@ -61,24 +76,24 @@ unsigned long long hash_search(const struct hash_table *const table, const unsig
  *	\param i number of probes
  *	\return index of hash
  */
-static unsigned long long _hash_insert(struct hash_table *const table, unsigned long long key, const void *value) {
-
-	#if GCC_VERSION > 70000
-	__label__ hash_element_position_found;
-	#endif
+static unsigned long long _hash_insert(struct hash_table *const table, unsigned long long key, const void* const value) {
 
 	unsigned long long j, i = 0;
 
+	if(table == NULL) { return DUMMY_KEY; }
+
 	j = hash_search(table, key);
 	if (j != DUMMY_KEY) {
-		goto hash_element_position_found;
+		table->slot[j].hash = hash_method(table, key, 0);
+		table->slot[j].key = key;
+		table->slot[j].value = (void *)value;
+		return j;
 	}
 
 	do {
 		j = hash_method(table, key, i);
 		if (table->slot[j].hash == DUMMY_KEY || table->slot[j].key == DUMMY_KEY) {
 			++table->used;
-hash_element_position_found:
 			table->slot[j].hash = hash_method(table, key, 0);
 			table->slot[j].key = key;
 			table->slot[j].value = (void *)value;
@@ -98,10 +113,12 @@ hash_element_position_found:
  *	\param i number of probes
  *	\return index of hash
  */
-unsigned long long hash_insert(struct hash_table *table, unsigned long long key, const void *value) {
+unsigned long long hash_insert(struct hash_table *table, unsigned long long key, const void* const value) {
 	struct hash_table aux;
 	struct hash_element *el;
 	unsigned long long j,i;
+
+	if(table == NULL) { return DUMMY_KEY; }
 
 	if (!table->capacity || table->used / (long double)table->capacity > OCCUPACY) {
 		aux.capacity = 2 * (table->capacity ? table->capacity : 1);
@@ -134,8 +151,11 @@ unsigned long long hash_insert(struct hash_table *table, unsigned long long key,
  */
 unsigned long long hash_delete(struct hash_table *const table, const unsigned long long key)
 {
-	unsigned long long j = hash_search(table, key);
+	unsigned long long j;
 
+	if(table == NULL) { return DUMMY_KEY; }
+
+	j = hash_search(table, key);
 	if (j != DUMMY_KEY) {
 		table->slot[j].key = DUMMY_KEY;
 		--table->used;
@@ -150,8 +170,14 @@ unsigned long long hash_delete(struct hash_table *const table, const unsigned lo
  */
 inline unsigned long long hash_len(const struct hash_table *const t)
 {
+	if(t == NULL) { return DUMMY_KEY; }
+
 	return t->used;
 }
+
+/**	\brief return a array containing the keys, must be freed
+ *	\param table hash table
+ */
 
 /**	\brief Return the value for key if key is in the hash, else default.
  *	\param table hash_table
@@ -159,13 +185,68 @@ inline unsigned long long hash_len(const struct hash_table *const t)
  *	\param default default value if key not found
  *	\return if key exist return key, else default
  */
-void* hash_get(const struct hash_table* const table , unsigned long long key, void* const defaul)
+void* hash_get(const struct hash_table* const table , unsigned long long key, const void* const defaul)
 {
-	unsigned long long j = hash_search(table, key);
+	unsigned long long j;
 
+	if(table == NULL) { return (void*)defaul; }
+
+	j = hash_search(table, key);
 	if (j != DUMMY_KEY) {
 		return table->slot[j].value;
 	}
 
-	return defaul;
+	return (void*)defaul;
+}
+
+/**	\brief get a char and transform in unsigned long long
+ *
+ *	if the string its longer than sizeof(unsigned long long) its truncated
+ *	assumption, the end of the string its more probably to be different
+ *	\param cad string to transform
+ */
+unsigned long long char2ull(const char* const cad)
+{
+	unsigned long long c, key = 0;
+	size_t len;
+
+	len = strlen(cad);
+
+	for(unsigned long long i = 0; len - i > 0 && i < sizeof(unsigned long long); ++i) {
+		c = (unsigned long long)cad[len - i - 1];
+		c <<= 8 * i;
+		key |= c;
+	}
+
+	return key;
+}
+
+/**	\helper method of insert for string */
+unsigned long long dict_insert(struct hash_table* const dict, const char* const key, const void* const value)
+{
+	return hash_insert(dict, char2ull(key), value);
+}
+
+/**	\helper method of search for string */
+unsigned long long dict_search(struct hash_table* const dict, const char* const key)
+{
+	return hash_search(dict, char2ull(key));
+}
+
+/**	\helper method of search for string */
+int dict_has_key(const struct hash_table* const dict, const char* const key)
+{
+	return hash_has_key(dict, char2ull(key));
+}
+
+/**	\helper method of delete for string */
+unsigned long long dict_delete(struct hash_table* const dict, const char* const key)
+{
+	return hash_delete(dict, char2ull(key));
+}
+
+/**	\helper method of get for string */
+void* dict_get(const struct hash_table* const dict, const char* const key, const void* const defaul)
+{
+	return hash_get(dict, char2ull(key), defaul);
 }
