@@ -9,11 +9,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "hash_table.h"
 
 #if !defined(hash_method)
-#define hash_method hash_method_linear_division
+#define hash_method hash_method_geometric
 #endif
 
 #define GCC_VERSION                                                            \
@@ -31,6 +32,22 @@ hash_method_linear_division(const struct hash_table *const table,
 				                    const uintmax_t key,
 				                    const uintmax_t i) {
 	return (key + i) % table->capacity;
+}
+
+/**	\brief geometric hash
+ *
+ *	j = ((5*j) + 1) mod (2**i: size)
+ *	For any initial j in range(2**i), repeating that 2**i times generates each int in range(2**i) exactly once
+ */
+static inline uintmax_t
+hash_method_geometric(const struct hash_table *const table,
+				                    const uintmax_t key,
+				                    const uintmax_t i) {
+
+	uintmax_t j;
+
+	j = key % table->capacity;
+	return ((5 * (j + i)) + 1) % table->capacity;
 }
 
 /**	\brief hash table search
@@ -61,12 +78,13 @@ uintmax_t hash_search(const struct hash_table *const table, const uintmax_t key)
  *	\param table table to seaarch
  *	\param key key to search
  */
-int hash_has_key(const struct hash_table *const table, const uintmax_t key) {
+bool hash_has_key(const struct hash_table *const table, const uintmax_t key) {
+
 	if(hash_search(table, key) != DUMMY_KEY) {
-		return 1;
+		return true;
 	}
 
-	return 0;
+	return false;
 }
 
 /**	\brief hash table insert, override value if key already exists
@@ -235,7 +253,7 @@ uintmax_t dict_search(struct hash_table* const dict, const char* const key)
 }
 
 /**	\helper method of search for string */
-int dict_has_key(const struct hash_table* const dict, const char* const key)
+bool dict_has_key(const struct hash_table* const dict, const char* const key)
 {
 	return hash_has_key(dict, char2key(key));
 }

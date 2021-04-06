@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #if !defined(__linux)
 #define uintmax_t unsigned long long
@@ -30,7 +31,7 @@ struct hash_table {
 //uint key implementation
 uintmax_t hash_insert(struct hash_table* table, uintmax_t key, const void* const value);
 uintmax_t hash_search(const struct hash_table* const table, const uintmax_t key);
-int hash_has_key(const struct hash_table *const, const uintmax_t);
+bool hash_has_key(const struct hash_table *const, const uintmax_t);
 uintmax_t hash_delete(struct hash_table* const table, const uintmax_t key);
 inline uintmax_t hash_len(const struct hash_table* const);
 void* hash_get(const struct hash_table* const, uintmax_t key, const void* const defaul);
@@ -39,10 +40,12 @@ void* hash_get(const struct hash_table* const, uintmax_t key, const void* const 
 uintmax_t char2key( const char* const );
 uintmax_t dict_insert(struct hash_table* const, const char* const, const void* const);
 uintmax_t dict_search(struct hash_table* const, const char* const);
-int dict_has_key(const struct hash_table *const, const char* const);
+bool dict_has_key(const struct hash_table *const, const char* const);
 uintmax_t dict_delete(struct hash_table* const, const char* const);
 #define dict_len hash_len
 void* dict_get(const struct hash_table* const, const char* const, const void* const);
+
+#define Dict_len hash_len
 
 #define Dict_insert(table, key, value) \
 	_Generic(key, \

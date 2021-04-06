@@ -4,12 +4,14 @@
 ---
 
 ### Hash algorithms implemented
-- division hash and linear probing
-
+- linear hash: key + i
+- geometric hash: (5 * (key + i)) + 1
 ---
 
 ### Comments
 A lot of things can be improved...
+may be create a init function that produce tabes of size 2^n?
+you can rmeove the % operator by & more efficient
 
 ---
 
