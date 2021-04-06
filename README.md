@@ -1,9 +1,9 @@
-# Hash table implementation
+# Dictionary implementation
 ### hash table that support operation INSERT, SEARCH, DELETE
 
 ---
 
-### HASH algorithms implemented
+### Hash algorithms implemented
 - division hash and linear probing
 
 ---
@@ -21,7 +21,9 @@ For run the tests are necesary [CppUTest](https://cpputest.github.io/)
 - improve the documentation, add reference to dictionary
 - Add makefile to create a library
 - init hash_table function?
-- Add \_Generic for do a monad
+- Add guthubs actions for precompile
+- Add more hash implementations
+- Add performance tests
 
 ---
 
