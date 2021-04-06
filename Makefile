@@ -18,7 +18,7 @@ WARNING_FLAGS := -Wextra -Wall -Wshadow -Wdouble-promotion -Wpadded \
 CFLAGS += ${WARNING_FLAGS} ${INCLUDE_FLAGS} ${DEBUG_FLAGS}
 export
 
-.PHONY: clean tests coverage
+.PHONY: clean tests coverage library
 
 ${OBJECTS}: %.o: %.c
 	${CC} -Werror ${CFLAGS} -MMD -c $< -o $@
@@ -27,8 +27,14 @@ tests: ${OBJECTS}
 	${MAKE} -C tests tests
 	./tests/tests
 
+library: ${OBJECTS} | lib
+	ar -rc lib/libdictionary.a $^
+
+lib:
+	mkdir lib
+
 -include $(DEPENDENCIES)
 
 clean:
-	rm ${OBJECTS} ${DEPENDENCIES}
+	rm -rf ${OBJECTS} ${DEPENDENCIES} lib
 	-$(MAKE) -C tests clean
