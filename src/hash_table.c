@@ -206,7 +206,7 @@ void* hash_get(const struct hash_table* const table , uintmax_t key, const void*
  *	assumption, the end of the string its more probably to be different
  *	\param cad string to transform
  */
-uintmax_t char2ull(const char* const cad)
+uintmax_t char2key(const char* const cad)
 {
 	uintmax_t c, key = 0;
 	size_t len;
@@ -225,29 +225,29 @@ uintmax_t char2ull(const char* const cad)
 /**	\helper method of insert for string */
 uintmax_t dict_insert(struct hash_table* const dict, const char* const key, const void* const value)
 {
-	return hash_insert(dict, char2ull(key), value);
+	return hash_insert(dict, char2key(key), value);
 }
 
 /**	\helper method of search for string */
 uintmax_t dict_search(struct hash_table* const dict, const char* const key)
 {
-	return hash_search(dict, char2ull(key));
+	return hash_search(dict, char2key(key));
 }
 
 /**	\helper method of search for string */
 int dict_has_key(const struct hash_table* const dict, const char* const key)
 {
-	return hash_has_key(dict, char2ull(key));
+	return hash_has_key(dict, char2key(key));
 }
 
 /**	\helper method of delete for string */
 uintmax_t dict_delete(struct hash_table* const dict, const char* const key)
 {
-	return hash_delete(dict, char2ull(key));
+	return hash_delete(dict, char2key(key));
 }
 
 /**	\helper method of get for string */
 void* dict_get(const struct hash_table* const dict, const char* const key, const void* const defaul)
 {
-	return hash_get(dict, char2ull(key), defaul);
+	return hash_get(dict, char2key(key), defaul);
 }
