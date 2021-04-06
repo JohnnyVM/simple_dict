@@ -31,4 +31,4 @@ For run the tests are necesary [CppUTest](https://cpputest.github.io/)
 
 ### References
 - [Introduction to algorithms](https://en.wikipedia.org/wiki/Introduction_to_Algorithms)
-- [Old python dict object implementation](svn.python.org/projects/python/trunk/Objects/dictobject.c)
+- [Old python dict object implementation](https://github.com/python/cpython/blob/master/Objects/dictobject.c)
