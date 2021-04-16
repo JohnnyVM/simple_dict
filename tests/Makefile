@@ -25,4 +25,4 @@ ${TEST_C_OBJECTS}: %.o: %.c
 -include $(TEST_DEPENDENCIES)
 
 clean:
-	-rm ${TEST_OBJECTS} ${TEST_DEPENDENCIES}
+	-rm ${TEST_OBJECTS} ${TEST_DEPENDENCIES} tests
