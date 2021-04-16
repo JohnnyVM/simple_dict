@@ -7,7 +7,7 @@
 #include <stdbool.h>
 
 #if !defined(__linux)
-#define uintmax_t unsigned long long
+#define const uintmax_t unsigned long long
 #endif
 
 #define DUMMY_KEY ULLONG_MAX
@@ -28,12 +28,12 @@ struct hash_table {
 };
 
 //uint key implementation
-uintmax_t hash_insert(struct hash_table*, uintmax_t key, const void*);
-uintmax_t hash_search(const struct hash_table*, uintmax_t key);
-bool hash_has_key(const struct hash_table*, uintmax_t);
-uintmax_t hash_delete(struct hash_table* table, uintmax_t);
+uintmax_t hash_insert(struct hash_table*, const uintmax_t key, const void*);
+uintmax_t hash_search(const struct hash_table*, const uintmax_t key);
+bool hash_has_key(const struct hash_table*, const uintmax_t);
+uintmax_t hash_delete(struct hash_table* table, const uintmax_t);
 inline uintmax_t hash_len(const struct hash_table*);
-void* hash_get(const struct hash_table*, uintmax_t key, const void*);
+void* hash_get(const struct hash_table*, const uintmax_t key, const void*);
 
 // Char key implementation
 uintmax_t char2key( const char* );
