@@ -1,7 +1,8 @@
-/**	\file hash_table.c
- *	\brief Hash table and dict implementation
+/**
+ * \file hash_table.c
+ * \brief Hash table and dict implementation
  *
- *	In this functions memory must be initialized to 0 to work
+ * In this functions memory must be initialized to 0 to work
  */
 
 #include <assert.h>
@@ -20,12 +21,13 @@
 #define GCC_VERSION                                                            \
 	(__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
 
-/**	\brief most simple hashing method
- *	\todo this algorithm its innadecuate for most uses
- *	\param table hash table
- *	\param key key value
- *	\param i number of probes
- *	\return index of hash
+/**
+ * \brief most simple hashing method
+ * \todo this algorithm its innadecuate for most uses
+ * \param table hash table
+ * \param key key value
+ * \param i number of probes
+ * \return index of hash
  */
 static inline uintmax_t
 hash_method_linear_division(const struct hash_table *const table,
@@ -50,12 +52,13 @@ hash_method_geometric(const struct hash_table *const table,
 	return ((5 * (j + i)) + 1) % table->capacity;
 }
 
-/**	\brief hash table search
+/**
+ * \brief hash table search
  *
- *	\param table hash table
- *	\param key key value
- *	\param i number of probes
- *	\return index of hash
+ * \param table hash table
+ * \param key key value
+ * \param i number of probes
+ * \return index of hash
  */
 uintmax_t hash_search(const struct hash_table *const table, const uintmax_t key) {
 
@@ -74,9 +77,10 @@ uintmax_t hash_search(const struct hash_table *const table, const uintmax_t key)
 	return DUMMY_KEY;
 }
 
-/**	\brief helper common method search key
- *	\param table table to seaarch
- *	\param key key to search
+/**
+ * \brief helper common method search key
+ * \param table table to seaarch
+ * \param key key to search
  */
 bool hash_has_key(const struct hash_table *const table, const uintmax_t key) {
 
@@ -87,13 +91,14 @@ bool hash_has_key(const struct hash_table *const table, const uintmax_t key) {
 	return false;
 }
 
-/**	\brief hash table insert, override value if key already exists
+/**
+ * \brief hash table insert, override value if key already exists
  *
- *	\todo remove that goto...
- *	\param table hash table
- *	\param key key value
- *	\param i number of probes
- *	\return index of hash
+ * \todo remove that goto...
+ * \param table hash table
+ * \param key key value
+ * \param i number of probes
+ * \return index of hash
  */
 static uintmax_t _hash_insert(struct hash_table *const table, uintmax_t key, const void* const value) {
 
@@ -125,14 +130,15 @@ static uintmax_t _hash_insert(struct hash_table *const table, uintmax_t key, con
 	return DUMMY_KEY;
 }
 
-/**	\brief hash table insert, override value if key already exists
+/**
+ * \brief hash table insert, override value if key already exists
  *
- *	\param table hash table
- *	\param key key value
- *	\param i number of probes
- *	\return index of hash
+ * \param table hash table
+ * \param key key value
+ * \param i number of probes
+ * \return index of hash
  */
-uintmax_t hash_insert(struct hash_table *table, uintmax_t key, const void* const value) {
+uintmax_t hash_insert(struct hash_table *table, uintmax_t key, const void* value) {
 	struct hash_table aux;
 	struct hash_element *el;
 	uintmax_t j,i;
@@ -140,7 +146,7 @@ uintmax_t hash_insert(struct hash_table *table, uintmax_t key, const void* const
 	if(table == NULL) { return DUMMY_KEY; }
 
 	if (!table->capacity || table->used / (long double)table->capacity > OCCUPACY) {
-		aux.capacity = 2 * (table->capacity ? table->capacity : 1);
+		aux.capacity = 2 * (table->capacity ? table->capacity : 4);
 		aux.used = 0;
 		aux.slot = malloc(aux.capacity * sizeof(struct hash_element));
 		assert(aux.slot);
@@ -162,13 +168,14 @@ uintmax_t hash_insert(struct hash_table *table, uintmax_t key, const void* const
 	return j;
 }
 
-/**	\brief hash table delete entry
+/**
+ * \brief hash table delete entry
  *
- *	\param table hash table
- *	\param key key value to delete
- *	\return index of hash
+ * \param table hash table
+ * \param key key value to delete
+ * \return index of hash
  */
-uintmax_t hash_delete(struct hash_table *const table, const uintmax_t key)
+uintmax_t hash_delete(struct hash_table* table, uintmax_t key)
 {
 	uintmax_t j;
 
@@ -183,28 +190,31 @@ uintmax_t hash_delete(struct hash_table *const table, const uintmax_t key)
 	return j;
 }
 
-/** \brief Return the number of items in the hash table
- *	\param t hash table
+/**
+ * \brief Return the number of items in the hash table
+ * \param t hash table
  * \return return the number of items
  */
-inline uintmax_t hash_len(const struct hash_table *const t)
+inline uintmax_t hash_len(const struct hash_table* t)
 {
-	if(t == NULL) { return DUMMY_KEY; }
+	if(t == NULL) { return 0; }
 
 	return t->used;
 }
 
-/**	\brief return a array containing the keys, must be freed
- *	\param table hash table
+/**
+ * \brief return a array containing the keys, must be freed
+ * \param table hash table
  */
 
-/**	\brief Return the value for key if key is in the hash, else default.
- *	\param table hash_table
- *	\param key key table
- *	\param default default value if key not found
- *	\return if key exist return key, else default
+/**
+ * \brief Return the value for key if key is in the hash, else default.
+ * \param table hash_table
+ * \param key key table
+ * \param default default value if key not found
+ * \return if key exist return key, else default
  */
-void* hash_get(const struct hash_table* const table , uintmax_t key, const void* const defaul)
+void* hash_get(const struct hash_table* table , uintmax_t key, const void* defaul)
 {
 	uintmax_t j;
 
@@ -218,13 +228,14 @@ void* hash_get(const struct hash_table* const table , uintmax_t key, const void*
 	return (void*)defaul;
 }
 
-/**	\brief get a char and transform in uintmax_t
+/**
+ * \brief get a char and transform in uintmax_t
  *
- *	if the string its longer than sizeof(uintmax_t) its truncated
- *	assumption, the end of the string its more probably to be different
- *	\param cad string to transform
+ * if the string its longer than sizeof(uintmax_t) its truncated
+ * assumption, the end of the string its more probably to be different
+ * \param cad string to transform
  */
-uintmax_t char2key(const char* const cad)
+uintmax_t char2key(const char* cad)
 {
 	uintmax_t c, key = 0;
 	size_t len;
@@ -240,32 +251,32 @@ uintmax_t char2key(const char* const cad)
 	return key;
 }
 
-/**	\helper method of insert for string */
-uintmax_t dict_insert(struct hash_table* const dict, const char* const key, const void* const value)
+/** \brief helper method of insert for string */
+uintmax_t hash_insert_char(struct hash_table* dict, const char* key, const void* value)
 {
 	return hash_insert(dict, char2key(key), value);
 }
 
-/**	\helper method of search for string */
-uintmax_t dict_search(struct hash_table* const dict, const char* const key)
+/** \brief helper method of search for string */
+uintmax_t hash_search_char(struct hash_table* dict, const char* key)
 {
 	return hash_search(dict, char2key(key));
 }
 
-/**	\helper method of search for string */
-bool dict_has_key(const struct hash_table* const dict, const char* const key)
+/** \brief helper method of has key for string */
+bool hash_has_key_char(const struct hash_table* dict, const char* key)
 {
 	return hash_has_key(dict, char2key(key));
 }
 
-/**	\helper method of delete for string */
-uintmax_t dict_delete(struct hash_table* const dict, const char* const key)
+/** \brief helper method of delete for string */
+uintmax_t hash_delete_char(struct hash_table* dict, const char* key)
 {
 	return hash_delete(dict, char2key(key));
 }
 
-/**	\helper method of get for string */
-void* dict_get(const struct hash_table* const dict, const char* const key, const void* const defaul)
+/** \brief helper method of get for string */
+void* hash_get_char(const struct hash_table* dict, const char* key, const void* defaul)
 {
 	return hash_get(dict, char2key(key), defaul);
 }

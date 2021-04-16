@@ -12,15 +12,14 @@
 
 #define DUMMY_KEY ULLONG_MAX
 
-// todo explain this magic number
-#define OCCUPACY 2 / (long double)3.0
+// TODO explain this magic number
+#define OCCUPACY 8 / (long double)10.0
 
 struct hash_element {
 	uintmax_t hash; // its use as sentinel value fot check if was used
 	uintmax_t key;
 	void* value;
 };
-
 
 struct hash_table {
 	struct hash_element* slot;
@@ -29,51 +28,56 @@ struct hash_table {
 };
 
 //uint key implementation
-uintmax_t hash_insert(struct hash_table* table, uintmax_t key, const void* const value);
-uintmax_t hash_search(const struct hash_table* const table, const uintmax_t key);
-bool hash_has_key(const struct hash_table *const, const uintmax_t);
-uintmax_t hash_delete(struct hash_table* const table, const uintmax_t key);
-inline uintmax_t hash_len(const struct hash_table* const);
-void* hash_get(const struct hash_table* const, uintmax_t key, const void* const defaul);
+uintmax_t hash_insert(struct hash_table*, uintmax_t key, const void*);
+uintmax_t hash_search(const struct hash_table*, uintmax_t key);
+bool hash_has_key(const struct hash_table*, uintmax_t);
+uintmax_t hash_delete(struct hash_table* table, uintmax_t);
+inline uintmax_t hash_len(const struct hash_table*);
+void* hash_get(const struct hash_table*, uintmax_t key, const void*);
 
 // Char key implementation
-uintmax_t char2key( const char* const );
-uintmax_t dict_insert(struct hash_table* const, const char* const, const void* const);
-uintmax_t dict_search(struct hash_table* const, const char* const);
-bool dict_has_key(const struct hash_table *const, const char* const);
-uintmax_t dict_delete(struct hash_table* const, const char* const);
+uintmax_t char2key( const char* );
+uintmax_t hash_insert_char(struct hash_table*, const char*, const void*);
+uintmax_t hash_search_char(struct hash_table*, const char*);
+bool hash_has_key_char(const struct hash_table*, const char*);
+uintmax_t hash_delete_char(struct hash_table*, const char*);
+#define hash_len_char hash_len
+void* hash_get_char(const struct hash_table*, const char*, const void*);
+
 #define dict_len hash_len
-void* dict_get(const struct hash_table* const, const char* const, const void* const);
 
-#define Dict_len hash_len
-
-#define Dict_insert(table, key, value) \
+#define dict_insert(table, key, value) \
 	_Generic(key, \
-		char*: dict_insert, \
+		char*: hash_insert_char, \
+		const char*: hash_insert_char, \
 		default: hash_insert \
 		)(table, key, value)
 
-#define Dict_search(table, key) \
+#define dict_search(table, key) \
 	_Generic(key, \
-		char*: dict_search, \
+		char*: hash_search_char, \
+		const char*: hash_search_char, \
 		default: hash_search \
 		)(table, key)
 
-#define Dict_delete(table, key) \
+#define dict_delete(table, key) \
 	_Generic(key, \
-		char*: dict_delete, \
+		char*: hash_delete_char, \
+		const char*: hash_delete_char, \
 		default: hash_delete \
 		)(table, key)
 
-#define Dict_get(table, key, value) \
+#define dict_get(table, key, value) \
 	_Generic(key, \
-		char*: dict_get, \
+		char*: hash_get_char, \
+		const char*: hash_get_char, \
 		default: hash_get \
 		)(table, key, value)
 
-#define Dict_has_key(table, key) \
+#define dict_has_key(table, key) \
 	_Generic(key, \
-		char*: dict_has_key, \
+		char*: hash_has_key_char, \
+		const char*: hash_has_key_char, \
 		default: hash_has_key \
 		)(table, key)
 
