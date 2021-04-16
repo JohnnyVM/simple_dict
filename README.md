@@ -1,11 +1,12 @@
-# Dictionary implementation
-### hash table that support operation INSERT, SEARCH, DELETE
+# C11 dictionary implementation
+### Dictionary that support operation INSERT, SEARCH, DELETE
+and a small helper for has_key, hash_len
 
 ---
 
 ### Hash algorithms implemented
 - linear hash: key + i
-- geometric hash: (5 * (key + i)) + 1
+- geometric hash(DEFAULT): (5 * (key + i)) + 1
 ---
 
 ### Comments
@@ -15,6 +16,11 @@ you can rmeove the % operator by & more efficient
 
 ---
 
+### Caveats
+
+If the dict is manually initialized wth length 1 fail
+
+---
 ### Dependencies
 For run the tests are necesary [CppUTest](https://cpputest.github.io/)
 
@@ -28,6 +34,7 @@ For run the tests are necesary [CppUTest](https://cpputest.github.io/)
 - Add performance tests
 
 ---
+
 
 ### References
 - [Introduction to algorithms](https://en.wikipedia.org/wiki/Introduction_to_Algorithms)
