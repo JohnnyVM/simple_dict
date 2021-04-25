@@ -158,7 +158,7 @@ uintmax_t hash_insert(struct hash_table *table, uintmax_t key, const void* value
 			}
 		}
 		if(table->slot) { free(table->slot); }
-		memcpy(table, &aux, sizeof(struct hash_table));
+		memcpy(table, &aux, sizeof *table);
 	}
 
 	j = _hash_insert(table, key, value);
