@@ -27,7 +27,7 @@
  * \param i number of probes
  * \return index of hash
  */
-static inline uintmax_t
+static uintmax_t
 hash_method_linear_division(const struct hash_table *const table,
 				                    const uintmax_t key,
 				                    const uintmax_t i) {
@@ -39,7 +39,7 @@ hash_method_linear_division(const struct hash_table *const table,
  *	j = ((5*j) + 1) mod (2**i: size)
  *	For any initial j in range(2**i), repeating that 2**i times generates each int in range(2**i) exactly once
  */
-static inline uintmax_t
+static uintmax_t
 hash_method_geometric(const struct hash_table *const table,
 				                    const uintmax_t key,
 				                    const uintmax_t i) {
