@@ -32,7 +32,8 @@ For run the tests are necesary [CppUTest](https://cpputest.github.io/)
 - Add guthubs actions for precompile
 - Add more hash implementations
 - Add performance tests
-
+- Add log
+- remove the asserts and improve the error handler
 ---
 
 
