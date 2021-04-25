@@ -1,8 +1,6 @@
 /**
  * \file hash_table.c
  * \brief Hash table and dict implementation
- *
- * In this functions memory must be initialized to 0 to work
  */
 
 #include <assert.h>
