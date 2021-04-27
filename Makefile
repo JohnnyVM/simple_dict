@@ -27,7 +27,7 @@ ${OBJECTS}: %.o: %.c
 
 tests: ${OBJECTS}
 	${MAKE} -C tests tests
-	./tests/tests
+	LSAN_OPTIONS=verbosity=1:log_threads=1 ./tests/tests
 
 library: ${OBJECTS} | lib
 	ar -rc lib/libdictionary.a $^
