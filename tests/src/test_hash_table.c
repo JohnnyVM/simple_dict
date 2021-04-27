@@ -17,7 +17,7 @@ TEST_C(dict_table, create_insert_delete_number)
 	struct hash_table* dict = Dict();
 	uintmax_t key, key2;
 
-	key = dict_insert(dict, 0LLU, NULL, sizeof(long long unsigned));
+	key = dict_insert(dict, 0LLU, NULL, 0);
 	CHECK_C(key != DUMMY_KEY);
 	CHECK_C(dict->used == 1);
 	key2 = dict_delete(dict, 0LLU);
@@ -47,11 +47,13 @@ TEST_C(dict_table, create_insert_update_delete)
 {
 	struct hash_table table = {.capacity = 0};
 	uintmax_t key, key2;
+	int i = 1;
 
-	key = dict_insert(&table, 0LLU, (const void*)1, 0);
+	key = dict_insert(&table, 0LLU, &i, sizeof(int));
 	CHECK_C(dict_has_key(&table, 0));
 	CHECK_C(key != DUMMY_KEY);
-	key2 = dict_insert(&table, 0LLU, (const void*)2, 0);
+	i = 2;
+	key2 = dict_insert(&table, 0LLU, &i, sizeof(int));
 	CHECK_C(key2 == key);
 	CHECK_C(table.used == 1);
 	key = dict_delete(&table, 0LLU);
