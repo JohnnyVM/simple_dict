@@ -12,7 +12,6 @@ TEST_C_WRAPPER(dict_table, create_insert_delete_number);
 TEST_C_WRAPPER(dict_table, create_insert_delete_char);
 TEST_C_WRAPPER(dict_table, create_insert_update_delete);
 TEST_C_WRAPPER(dict_table, create_insert_collision_search);
-TEST_C_WRAPPER(dict_table, stress);
 TEST_C_WRAPPER(dict_table, char2ull);
 
 int main(int ac, char** av)

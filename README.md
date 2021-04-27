@@ -1,6 +1,6 @@
 # C11 dictionary implementation
 ### Dictionary that support operation INSERT, SEARCH, DELETE
-and a small helper for has_key, hash_len
+and other helpers
 
 ---
 
@@ -12,13 +12,13 @@ and a small helper for has_key, hash_len
 ### Comments
 A lot of things can be improved...
 may be create a init function that produce tabes of size 2^n?
-you can rmeove the % operator by & more efficient
+then you can remove the % operator by &, more efficient
 
 ---
 
 ### Caveats
 
-If the dict is manually initialized wth length 1 fail
+You can found bugs
 
 ---
 ### Dependencies
@@ -28,12 +28,13 @@ For run the tests are necesary [CppUTest](https://cpputest.github.io/)
 ### TODO list
 - improve the documentation, add reference to dictionary
 - Add makefile to create a library
-- init hash_table function?
 - Add guthubs actions for precompile
 - Add more hash implementations
 - Add performance tests
-- Add log
+- Add coverage
 - remove the asserts and improve the error handler
+- Remove the defines
+- Add a sigsev mask if value its a invalid pointer
 ---
 
 

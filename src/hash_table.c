@@ -27,7 +27,7 @@
  * \param i number of probes
  * \return index of hash
  */
-static uintmax_t
+[[maybe_unused]]static uintmax_t
 hash_method_linear_division(const struct hash_table *const table,
 				                    const uintmax_t key,
 				                    const uintmax_t i) {
@@ -50,6 +50,20 @@ hash_method_geometric(const struct hash_table *const table,
 	return ((5 * (j + i)) + 1) % table->capacity;
 }
 
+struct hash_table* Hash_table(void)
+{
+	struct hash_table* table = malloc(sizeof(struct hash_table));
+
+	table->capacity = 8;
+	table->used = 0;
+	table->slot = malloc(table->capacity * sizeof(struct hash_element));
+
+	//mark the new table as unused
+	for (uintmax_t i = 0; i < table->capacity; ++i) { table->slot[i].hash = DUMMY_KEY; }
+
+	return table;
+}
+
 /**
  * \brief hash table search
  *
@@ -62,7 +76,7 @@ uintmax_t hash_search(const struct hash_table *const table, const uintmax_t key)
 
 	uintmax_t j, i = 0;
 
-	if(table == NULL) { return DUMMY_KEY; }
+	if(table == NULL || !table->capacity) { return DUMMY_KEY; }
 
 	do {
 		j = hash_method(table, key, i);
@@ -70,7 +84,8 @@ uintmax_t hash_search(const struct hash_table *const table, const uintmax_t key)
 			return j;
 		}
 		++i;
-	} while (table->slot[j].hash != DUMMY_KEY && i < table->capacity);
+	} while (table->slot[j].hash != DUMMY_KEY
+			&& i < table->capacity);
 
 	return DUMMY_KEY;
 }
@@ -90,26 +105,26 @@ bool hash_has_key(const struct hash_table *const table, const uintmax_t key) {
 }
 
 /**
- * \brief hash table insert, override value if key already exists
+ * \brief hash table insert, this functions exist only for the case
+ * when the table grow, unly need move the opinters not reallocate the memory
  *
- * \todo remove that goto...
  * \param table hash table
  * \param key key value
  * \param i number of probes
  * \return index of hash
  */
-static uintmax_t _hash_insert(struct hash_table *const table, uintmax_t key, const void* const value) {
+static uintmax_t _hash_move(struct hash_table *const table,
+							  uintmax_t key, const void* value, size_t size) {
 
 	uintmax_t j, i = 0;
 
-	if(table == NULL) { return DUMMY_KEY; }
-
 	j = hash_search(table, key);
 	if (j != DUMMY_KEY) {
-		table->slot[j].hash = hash_method(table, key, 0);
-		table->slot[j].key = key;
-		table->slot[j].value = (void *)value;
-		return j;
+			table->slot[j].hash = hash_method(table, key, 0);
+			table->slot[j].key = key;
+			table->slot[j].size = size;
+			table->slot[j].value = (void*)value;
+			return j;
 	}
 
 	do {
@@ -118,7 +133,53 @@ static uintmax_t _hash_insert(struct hash_table *const table, uintmax_t key, con
 			++table->used;
 			table->slot[j].hash = hash_method(table, key, 0);
 			table->slot[j].key = key;
-			table->slot[j].value = (void *)value;
+			table->slot[j].size = size;
+			table->slot[j].value = (void*)value;
+			return j;
+		}
+		++i;
+	} while (i < table->capacity);
+	assert(0);
+
+	return DUMMY_KEY;
+}
+
+/**
+ * \brief hash table insert, override value if key already exists
+ *
+ * \todo remove that goto...
+ * \param table hash table
+ * \param key key value
+ * \param i number of probes
+ * \return index of hash
+ */
+static uintmax_t _hash_insert(struct hash_table *const table,
+							  uintmax_t key, const void* value, size_t size) {
+
+	uintmax_t j, i = 0;
+
+	j = hash_search(table, key);
+	if (j != DUMMY_KEY) {
+		goto _has_insert_add_element;
+	}
+
+	do {
+		j = hash_method(table, key, i);
+		if (table->slot[j].hash == DUMMY_KEY || table->slot[j].key == DUMMY_KEY) {
+			++table->used;
+_has_insert_add_element:
+			table->slot[j].hash = hash_method(table, key, 0);
+			table->slot[j].key = key;
+			if(!value || !size) {
+				table->slot[j].size = 0;
+				table->slot[j].value = NULL;
+			} else {
+				table->slot[j].size = size;
+				void *tmp = malloc(size);
+				if(tmp == NULL) { return DUMMY_KEY; }
+				memcpy(tmp, value, size);
+				table->slot[j].value = tmp;
+			}
 			return j;
 		}
 		++i;
@@ -136,32 +197,37 @@ static uintmax_t _hash_insert(struct hash_table *const table, uintmax_t key, con
  * \param i number of probes
  * \return index of hash
  */
-uintmax_t hash_insert(struct hash_table *table, uintmax_t key, const void* value) {
+uintmax_t hash_insert(struct hash_table *table, uintmax_t key, const void* value, size_t size) {
 	struct hash_table aux;
 	struct hash_element *el;
 	uintmax_t j,i;
 
-	if(table == NULL) { return DUMMY_KEY; }
+	if(table == NULL
+			|| (value == NULL && size)
+			|| (value && size == 0)) { // this case will not fail, but its useless
+		return DUMMY_KEY;
+	}
 
-	if (!table->capacity || table->used / (long double)table->capacity > OCCUPACY) {
+	// < 2 becouse hash_geometric fail for 1
+	if (table->capacity < 2 || table->used / (long double)table->capacity > MAX_OCCUPACY) {
 		aux.capacity = 2 * (table->capacity ? table->capacity : 4);
 		aux.used = 0;
 		aux.slot = malloc(aux.capacity * sizeof(struct hash_element));
-		assert(aux.slot);
 
 		//mark the new table as unused
 		for (i = 0; i < aux.capacity; ++i) { aux.slot[i].hash = DUMMY_KEY; }
 
 		for (el = table->slot, i = 0; i < table->capacity; ++i, el = table->slot + i) {
 			if (el->hash != DUMMY_KEY && el->key != DUMMY_KEY) {
-				_hash_insert(&aux, el->key, el->value);
+				// We only need reallocate the pointers, not move the memory
+				_hash_move(&aux, el->key, el->value, size);
 			}
 		}
-		if(table->slot) { free(table->slot); }
-		memcpy(table, &aux, sizeof *table);
+		free(table->slot);
+		*table = aux;
 	}
 
-	j = _hash_insert(table, key, value);
+	j = _hash_insert(table, key, value, size);
 
 	return j;
 }
@@ -182,6 +248,9 @@ uintmax_t hash_delete(struct hash_table* table, uintmax_t key)
 	j = hash_search(table, key);
 	if (j != DUMMY_KEY) {
 		table->slot[j].key = DUMMY_KEY;
+		if(table->slot[j].value) {
+			free(table->slot[j].value);
+		}
 		--table->used;
 	}
 
@@ -189,21 +258,55 @@ uintmax_t hash_delete(struct hash_table* table, uintmax_t key)
 }
 
 /**
+ * \brief hash table delete
+ *
+ * \param table hash table
+ * \param key key value to delete
+ * \return index of hash
+ */
+void hash_table_delete(struct hash_table* table)
+{
+	struct hash_element *el;
+	uintmax_t i;
+
+	if(table == NULL || table->slot == NULL ) { return; }
+
+	for (el = table->slot, i = 0; i < table->capacity; ++i, el = table->slot + i) {
+		if (el->hash != DUMMY_KEY && el->key != DUMMY_KEY) {
+			if(el->value != NULL) {
+				free(el->value);
+			}
+		}
+	}
+	free(table->slot);
+	table->capacity = 0;
+	table->used = 0;
+}
+
+/**
+ * \brief hash table delete
+ *
+ * \param table hash table
+ * \param key key value to delete
+ * \return index of hash
+ */
+void hash_table_free(struct hash_table* table)
+{
+	hash_table_delete(table);
+	free(table);
+}
+
+/**
  * \brief Return the number of items in the hash table
  * \param t hash table
  * \return return the number of items
  */
-inline uintmax_t hash_len(const struct hash_table* t)
+uintmax_t hash_len(const struct hash_table* t)
 {
 	if(t == NULL) { return 0; }
 
 	return t->used;
 }
-
-/**
- * \brief return a array containing the keys, must be freed
- * \param table hash table
- */
 
 /**
  * \brief Return the value for key if key is in the hash, else default.
@@ -221,6 +324,34 @@ void* hash_get(const struct hash_table* table , uintmax_t key, const void* defau
 	j = hash_search(table, key);
 	if (j != DUMMY_KEY) {
 		return table->slot[j].value;
+	}
+
+	return (void*)defaul;
+}
+
+/**
+ * \brief Return the value for key if key is in the hash, else default.
+ * \param table hash_table
+ * \param key key table
+ * \param default default value if key not found
+ * \return if key exist return key, else default
+ */
+void* hash_get_copy(const struct hash_table* table , uintmax_t key, const void* defaul)
+{
+	uintmax_t j;
+
+	if(table == NULL) { return (void*)defaul; }
+
+	j = hash_search(table, key);
+	if (j != DUMMY_KEY) {
+		if(table->slot[j].value == NULL) {
+			return NULL;
+		}
+		void* tmp = malloc(table->slot[j].size);
+		if(tmp != NULL) {
+			memcpy(tmp, table->slot[j].value, table->slot[j].size);
+			return tmp;
+		}
 	}
 
 	return (void*)defaul;
@@ -250,9 +381,9 @@ uintmax_t char2key(const char* cad)
 }
 
 /** \brief helper method of insert for string */
-uintmax_t hash_insert_char(struct hash_table* dict, const char* key, const void* value)
+uintmax_t hash_insert_char(struct hash_table* dict, const char* key, const void* value, size_t size)
 {
-	return hash_insert(dict, char2key(key), value);
+	return hash_insert(dict, char2key(key), value, size);
 }
 
 /** \brief helper method of search for string */
@@ -277,4 +408,10 @@ uintmax_t hash_delete_char(struct hash_table* dict, const char* key)
 void* hash_get_char(const struct hash_table* dict, const char* key, const void* defaul)
 {
 	return hash_get(dict, char2key(key), defaul);
+}
+
+/** \brief helper method of get_copy for string */
+void* hash_get_copy_char(const struct hash_table* dict, const char* key, const void* defaul)
+{
+	return hash_get_copy(dict, char2key(key), defaul);
 }
