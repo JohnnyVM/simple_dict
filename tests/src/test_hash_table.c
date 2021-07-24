@@ -48,7 +48,7 @@ TEST_C(dict_table, create_insert_update_delete)
 	struct hash_table *table = Dict();
 	uintmax_t key, key2;
 	int i = 1;
-
+  
 	key = dict_insert(table, 0LLU, &i, sizeof i);
 	CHECK_C(dict_has_key(table, 0));
 	CHECK_C(key != DUMMY_KEY);
@@ -64,6 +64,8 @@ TEST_C(dict_table, create_insert_update_delete)
 	dict_free(table);
 }
 
+// test null
+
 TEST_C(dict_table, create_insert_collision_search)
 {
 	struct hash_table *table = Dict();
@@ -77,9 +79,11 @@ TEST_C(dict_table, create_insert_collision_search)
 	key2 = dict_insert(table, table->capacity, &i, sizeof i);
 	CHECK_C(dict_has_key(table, table->capacity));
 	CHECK_C(table->used == 2);
+
 	CHECK_C(key2 != DUMMY_KEY);
 	key3 = dict_search(table, 0LLU);
 	CHECK_C(key3 == key);
+  
 	CHECK_C(*(int*)dict_get(table, 0LLU, NULL) == 1);
 	key3 = dict_search(table, table->capacity);
 	CHECK_C(key3 == key2);

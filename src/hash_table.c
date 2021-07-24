@@ -87,6 +87,46 @@ bool hash_has_key(const struct hash_table *const table, const uintmax_t key) {
 }
 
 /**
+ * \brief hash table insert, this functions exist only for the case
+ * when the table grow, unly need move the opinters not reallocate the memory
+ *
+ * \param table hash table
+ * \param key key value
+ * \param i number of probes
+ * \return index of hash
+ */
+static uintmax_t _hash_move(struct hash_table *const table,
+							  uintmax_t key, const void* value, size_t size) {
+
+	uintmax_t j, i = 0;
+
+	j = hash_search(table, key);
+	if (j != DUMMY_KEY) {
+			table->slot[j].hash = hash_method(table, key, 0);
+			table->slot[j].key = key;
+			table->slot[j].size = size;
+			table->slot[j].value = (void*)value;
+			return j;
+	}
+
+	do {
+		j = hash_method(table, key, i);
+		if (table->slot[j].hash == DUMMY_KEY || table->slot[j].key == DUMMY_KEY) {
+			++table->used;
+			table->slot[j].hash = hash_method(table, key, 0);
+			table->slot[j].key = key;
+			table->slot[j].size = size;
+			table->slot[j].value = (void*)value;
+			return j;
+		}
+		++i;
+	} while (i < table->capacity);
+	assert(0);
+
+	return DUMMY_KEY;
+}
+
+/**
  * \brief hash table insert, override value if key already exists
  *
  * \todo remove that goto...
@@ -119,7 +159,7 @@ _has_insert_add_element:
 				table->slot[j].value = NULL;
 			} else {
 				table->slot[j].size = size;
-				// Use here realloc if you feel taht a used of
+				// Use here realloc if you feel that a used of
 				// unitialized memory is not posible
 				void *tmp = malloc(size);
 				if(tmp == NULL) { return DUMMY_KEY; }
