@@ -16,21 +16,6 @@
 #define hash_method hash_method_geometric
 #endif
 
-/**
- * \brief most simple hashing method
- * \deprecated this algorithm its innadecuate for most uses
- * \param table hash table
- * \param key key value
- * \param i number of probes
- * \return index of hash
- */
-[[maybe_unused]]static uintmax_t
-hash_method_linear_division(const struct hash_table *const table,
-				                    const uintmax_t key,
-				                    const uintmax_t i) {
-	return (key + i) % table->capacity;
-}
-
 /**	\brief geometric hash
  * a bit better
  *	j = ((5*j) + 1) mod (2**i: size)
@@ -221,11 +206,13 @@ uintmax_t hash_delete(struct hash_table* table, uintmax_t key)
 /**
  * \brief hash table delete
  *
+ * this function can be used if you want clean a hash_table, not the pointer, directly
+ * for simplify the implmentation better hide
  * \param table hash table
  * \param key key value to delete
  * \return index of hash
  */
-void hash_table_delete(struct hash_table* table)
+static void hash_table_delete(struct hash_table* table)
 {
 	struct hash_element *el;
 	uintmax_t i;

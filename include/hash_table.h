@@ -27,7 +27,6 @@ struct hash_table {
 //uint key implementation
 struct hash_table* Hash_table(void);
 void hash_table_free(struct hash_table*);
-void hash_table_delete(struct hash_table*);
 uintmax_t hash_insert(struct hash_table*, const uintmax_t key, const void*, size_t);
 uintmax_t hash_search(const struct hash_table*, const uintmax_t key);
 bool hash_has_key(const struct hash_table*, const uintmax_t);
@@ -41,9 +40,9 @@ uintmax_t char2key( const char* );
 uintmax_t hash_insert_char(struct hash_table*, const char*, const void*, size_t);
 uintmax_t hash_search_char(struct hash_table*, const char*);
 bool hash_has_key_char(const struct hash_table*, const char*);
-uintmax_t hash_delete_char(struct hash_table*, const char*);
 #define hash_len_char hash_len
 void* hash_get_char(const struct hash_table*, const char*, const void*);
+uintmax_t hash_delete_char(struct hash_table* dict, const char* key);
 
 // TODO move to own functions
 #define Dict Hash_table
