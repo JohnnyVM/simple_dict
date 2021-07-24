@@ -45,26 +45,24 @@ TEST_C(dict_table, create_insert_delete_char)
 
 TEST_C(dict_table, create_insert_update_delete)
 {
-	struct hash_table table = {.capacity = 0};
+	struct hash_table *table = Dict();
 	uintmax_t key, key2;
 	int i = 1;
 
-	key = dict_insert(&table, 0LLU, &i, sizeof(int));
-	CHECK_C(dict_has_key(&table, 0));
+	key = dict_insert(table, 0LLU, &i, sizeof(int));
+	CHECK_C(dict_has_key(table, 0));
 	CHECK_C(key != DUMMY_KEY);
 	i = 2;
-	key2 = dict_insert(&table, 0LLU, &i, sizeof(int));
+	key2 = dict_insert(table, 0LLU, &i, sizeof(int));
 	CHECK_C(key2 == key);
-	CHECK_C(table.used == 1);
-	key = dict_delete(&table, 0LLU);
-	CHECK_C(table.used == 0);
+	CHECK_C(table->used == 1);
+	key = dict_delete(table, 0LLU);
+	CHECK_C(table->used == 0);
 	CHECK_C(key2 == key);
-	CHECK_C(dict_get(&table, key, NULL) == NULL);
-	CHECK_C(table.used == 0);
-	dict_clear(&table);
+	CHECK_C(dict_get(table, key, NULL) == NULL);
+	CHECK_C(table->used == 0);
+	dict_free(table);
 }
-
-// test null
 
 TEST_C(dict_table, create_insert_collision_search)
 {

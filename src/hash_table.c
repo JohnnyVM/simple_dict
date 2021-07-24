@@ -16,12 +16,9 @@
 #define hash_method hash_method_geometric
 #endif
 
-#define GCC_VERSION                                                            \
-	(__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
-
 /**
  * \brief most simple hashing method
- * \todo this algorithm its innadecuate for most uses
+ * \deprecated this algorithm its innadecuate for most uses
  * \param table hash table
  * \param key key value
  * \param i number of probes
@@ -35,7 +32,7 @@ hash_method_linear_division(const struct hash_table *const table,
 }
 
 /**	\brief geometric hash
- *
+ * a bit better
  *	j = ((5*j) + 1) mod (2**i: size)
  *	For any initial j in range(2**i), repeating that 2**i times generates each int in range(2**i) exactly once
  */
@@ -105,46 +102,6 @@ bool hash_has_key(const struct hash_table *const table, const uintmax_t key) {
 }
 
 /**
- * \brief hash table insert, this functions exist only for the case
- * when the table grow, unly need move the opinters not reallocate the memory
- *
- * \param table hash table
- * \param key key value
- * \param i number of probes
- * \return index of hash
- */
-static uintmax_t _hash_move(struct hash_table *const table,
-							  uintmax_t key, const void* value, size_t size) {
-
-	uintmax_t j, i = 0;
-
-	j = hash_search(table, key);
-	if (j != DUMMY_KEY) {
-			table->slot[j].hash = hash_method(table, key, 0);
-			table->slot[j].key = key;
-			table->slot[j].size = size;
-			table->slot[j].value = (void*)value;
-			return j;
-	}
-
-	do {
-		j = hash_method(table, key, i);
-		if (table->slot[j].hash == DUMMY_KEY || table->slot[j].key == DUMMY_KEY) {
-			++table->used;
-			table->slot[j].hash = hash_method(table, key, 0);
-			table->slot[j].key = key;
-			table->slot[j].size = size;
-			table->slot[j].value = (void*)value;
-			return j;
-		}
-		++i;
-	} while (i < table->capacity);
-	assert(0);
-
-	return DUMMY_KEY;
-}
-
-/**
  * \brief hash table insert, override value if key already exists
  *
  * \todo remove that goto...
@@ -160,6 +117,8 @@ static uintmax_t _hash_insert(struct hash_table *const table,
 
 	j = hash_search(table, key);
 	if (j != DUMMY_KEY) {
+		// Clean previously setted
+		free(table->slot[j].value);
 		goto _has_insert_add_element;
 	}
 
@@ -175,6 +134,8 @@ _has_insert_add_element:
 				table->slot[j].value = NULL;
 			} else {
 				table->slot[j].size = size;
+				// Use here realloc if you feel taht a used of
+				// unitialized memory is not posible
 				void *tmp = malloc(size);
 				if(tmp == NULL) { return DUMMY_KEY; }
 				memcpy(tmp, value, size);
@@ -220,7 +181,7 @@ uintmax_t hash_insert(struct hash_table *table, uintmax_t key, const void* value
 		for (el = table->slot, i = 0; i < table->capacity; ++i, el = table->slot + i) {
 			if (el->hash != DUMMY_KEY && el->key != DUMMY_KEY) {
 				// We only need reallocate the pointers, not move the memory
-				_hash_move(&aux, el->key, el->value, size);
+				_hash_insert(&aux, el->key, el->value, size);
 			}
 		}
 		free(table->slot);
@@ -359,7 +320,6 @@ void* hash_get_copy(const struct hash_table* table , uintmax_t key, const void* 
 
 /**
  * \brief get a char and transform in uintmax_t
- *
  * if the string its longer than sizeof(uintmax_t) its truncated
  * assumption, the end of the string its more probably to be different
  * \param cad string to transform
@@ -380,8 +340,17 @@ uintmax_t char2key(const char* cad)
 	return key;
 }
 
-/** \brief helper method of insert for string */
-uintmax_t hash_insert_char(struct hash_table* dict, const char* key, const void* value, size_t size)
+/** \brief helper method of insert for string
+ *	\param dict dictionary
+ *	\param key key for value
+ *	\param value value to insert
+ *	\param size size of value
+ * */
+uintmax_t hash_insert_char(
+		struct hash_table* dict,
+		const char* key,
+		const void* value,
+		size_t size)
 {
 	return hash_insert(dict, char2key(key), value, size);
 }
