@@ -106,7 +106,7 @@ bool hash_has_key(const struct hash_table *const table, const uintmax_t key) {
 
 /**
  * \brief hash table insert, this functions exist only for the case
- * when the table grow, unly need move the opinters not reallocate the memory
+ * when the table grow, unly need move the pointers not reallocate the memory
  *
  * \param table hash table
  * \param key key value
