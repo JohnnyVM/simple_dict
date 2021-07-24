@@ -18,7 +18,7 @@ then you can remove the % operator by &, more efficient
 
 ### Caveats
 
-You can found bugs
+Mostly tested but can found bugs, i apreciate if the bug are report
 
 ---
 ### Dependencies
@@ -28,13 +28,10 @@ For run the tests are necesary [CppUTest](https://cpputest.github.io/)
 ### TODO list
 - improve the documentation, add reference to dictionary
 - Add makefile to create a library
-- Add guthubs actions for precompile
+- Add githubs actions for precompile
 - Add more hash implementations
 - Add performance tests
 - Add coverage
-- remove the asserts and improve the error handler
-- Remove the defines
-- Add a sigsev mask if value its a invalid pointer
 ---
 
 
