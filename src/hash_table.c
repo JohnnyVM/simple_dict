@@ -223,7 +223,7 @@ uintmax_t hash_insert(struct hash_table *table, uintmax_t key, const void* value
 				_hash_move(&aux, el->key, el->value, size);
 			}
 		}
-		free(table->slot);
+		hash_table_delete(table);
 		*table = aux;
 	}
 
