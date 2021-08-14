@@ -30,7 +30,7 @@ tests: ${OBJECTS}
 	LSAN_OPTIONS=verbosity=1:log_threads=1 ./tests/tests
 
 library: ${OBJECTS} | lib
-	ar -rc lib/libdictionary.a $^
+	ar -rc lib/libsimple_dict.a $^
 
 lib:
 	mkdir lib
