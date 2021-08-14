@@ -87,46 +87,6 @@ bool hash_has_key(const struct hash_table *const table, const uintmax_t key) {
 }
 
 /**
- * \brief hash table insert, this functions exist only for the case
- * when the table grow, unly need move the pointers not reallocate the memory
- *
- * \param table hash table
- * \param key key value
- * \param i number of probes
- * \return index of hash
- */
-static uintmax_t _hash_move(struct hash_table *const table,
-							  uintmax_t key, const void* value, size_t size) {
-
-	uintmax_t j, i = 0;
-
-	j = hash_search(table, key);
-	if (j != DUMMY_KEY) {
-			table->slot[j].hash = hash_method(table, key, 0);
-			table->slot[j].key = key;
-			table->slot[j].size = size;
-			table->slot[j].value = (void*)value;
-			return j;
-	}
-
-	do {
-		j = hash_method(table, key, i);
-		if (table->slot[j].hash == DUMMY_KEY || table->slot[j].key == DUMMY_KEY) {
-			++table->used;
-			table->slot[j].hash = hash_method(table, key, 0);
-			table->slot[j].key = key;
-			table->slot[j].size = size;
-			table->slot[j].value = (void*)value;
-			return j;
-		}
-		++i;
-	} while (i < table->capacity);
-	assert(0);
-
-	return DUMMY_KEY;
-}
-
-/**
  * \brief hash table insert, override value if key already exists
  *
  * \todo remove that goto...
@@ -173,6 +133,34 @@ _has_insert_add_element:
 	assert(0);
 
 	return DUMMY_KEY;
+}
+
+/**
+ * \brief hash table delete
+ *
+ * this function can be used if you want clean a hash_table, not the pointer, directly
+ * for simplify the implmentation better hide
+ * \param table hash table
+ * \param key key value to delete
+ * \return index of hash
+ */
+static void hash_table_delete(struct hash_table* table)
+{
+	struct hash_element *el;
+	uintmax_t i;
+
+	if(table == NULL || table->slot == NULL ) { return; }
+
+	for (el = table->slot, i = 0; i < table->capacity; ++i, el = table->slot + i) {
+		if (el->hash != DUMMY_KEY && el->key != DUMMY_KEY) {
+			if(el->value != NULL) {
+				free(el->value);
+			}
+		}
+	}
+	free(table->slot);
+	table->capacity = 0;
+	table->used = 0;
 }
 
 /**
@@ -241,34 +229,6 @@ uintmax_t hash_delete(struct hash_table* table, uintmax_t key)
 	}
 
 	return j;
-}
-
-/**
- * \brief hash table delete
- *
- * this function can be used if you want clean a hash_table, not the pointer, directly
- * for simplify the implmentation better hide
- * \param table hash table
- * \param key key value to delete
- * \return index of hash
- */
-static void hash_table_delete(struct hash_table* table)
-{
-	struct hash_element *el;
-	uintmax_t i;
-
-	if(table == NULL || table->slot == NULL ) { return; }
-
-	for (el = table->slot, i = 0; i < table->capacity; ++i, el = table->slot + i) {
-		if (el->hash != DUMMY_KEY && el->key != DUMMY_KEY) {
-			if(el->value != NULL) {
-				free(el->value);
-			}
-		}
-	}
-	free(table->slot);
-	table->capacity = 0;
-	table->used = 0;
 }
 
 /**
@@ -351,7 +311,7 @@ void* hash_get_copy(const struct hash_table* table , uintmax_t key, const void* 
  * assumption, the end of the string its more probably to be different
  * \param cad string to transform
  */
-uintmax_t char2key(const char* cad)
+uintmax_t char2key_reverse(const char* cad)
 {
 	uintmax_t c, key = 0;
 	size_t len;
@@ -367,12 +327,30 @@ uintmax_t char2key(const char* cad)
 	return key;
 }
 
+/**
+ * \brief get a char and transform in uintmax_t
+ * if the string its longer than sizeof(uintmax_t) its truncated
+ * assumption, the end of the string its more probably to be different
+ * \param cad string to transform
+ */
+uintmax_t char2key(const char* cad)
+{
+	uintmax_t key = 0;
+	size_t len;
+
+	len = strlen(cad) < sizeof(uintmax_t) ? strlen(cad) : sizeof(uintmax_t);
+
+	memcpy(&key, cad, len);
+
+	return key;
+}
+
 /** \brief helper method of insert for string
  *	\param dict dictionary
  *	\param key key for value
  *	\param value value to insert
  *	\param size size of value
- * */
+ */
 uintmax_t hash_insert_char(
 		struct hash_table* dict,
 		const char* key,
@@ -411,3 +389,4 @@ void* hash_get_copy_char(const struct hash_table* dict, const char* key, const v
 {
 	return hash_get_copy(dict, char2key(key), defaul);
 }
+
